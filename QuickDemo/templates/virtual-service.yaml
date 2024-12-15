@@ -11,6 +11,6 @@ spec:
   http:
     - route:
         - destination:
-            host: nginx-app.nginx-app.svc.cluster.local
+            host: nginx-app
             port:
               number: 80
