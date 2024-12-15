@@ -90,7 +90,7 @@ if (Test-Path "key.pem") { Remove-Item -Force "key.pem" }
 # Generate certificates for multiple domains
 $domains = "*.local-cluster.com local-cluster.com"
 Write-Host "Generating certificates for domains: $domains" -ForegroundColor Cyan
-mkcert -key-file key.pem -cert-file cert.pem *.local-cluster.com local-cluster.com
+mkcert -key-file key.pem -cert-file cert.pem *.localhost localhost
 
 # Verify certificate files exist
 if (-Not (Test-Path "cert.pem") -or -Not (Test-Path "key.pem")) {
@@ -109,4 +109,4 @@ kubectl create secret tls mkcert-tls `
 if(Test-Path "cert.pem") { Remove-Item -Force "cert.pem" }
 if(Test-Path "key.pem") { Remove-Item -Force "key.pem" }
 
-Write-Host "TLS secret created successfully for *.local-cluster and local-cluster!" -ForegroundColor Green
+Write-Host "TLS secret created successfully from mkcert!" -ForegroundColor Green
