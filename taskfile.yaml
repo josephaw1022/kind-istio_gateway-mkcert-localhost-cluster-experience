@@ -1,6 +1,23 @@
 version: '3'
 
 tasks:
+
+  full-start:
+    desc: "Create the Kind cluster, deploy the Helm chart and expose the service"
+    cmds:
+    - task create-cluster
+    - task upgrade-chart
+    silent: false
+    aliases: [ "fs" ]
+
+  full-stop:
+    desc: "Delete the Helm chart and the Kind cluster"
+    cmds:
+    - task delete-chart
+    - task delete-cluster
+    silent: false
+    aliases: [ "fstop" ]
+
   create-cluster:
     desc: "Create the Kind cluster using the PowerShell script"
     cmds:
@@ -25,6 +42,7 @@ tasks:
   delete-chart:
     desc: "Delete the namespace where the Helm chart is deployed"
     cmds:
+    - helm uninstall nginx-app --namespace nginx-app
     - kubectl delete namespace nginx-app --ignore-not-found
     silent: false
     aliases: [ "dc" ]
