@@ -11,6 +11,6 @@ spec:
   http:
     - route:
         - destination:
-            host: {{ .Release.Name }}-nginx
+            host: nginx-app
             port:
               number: 80

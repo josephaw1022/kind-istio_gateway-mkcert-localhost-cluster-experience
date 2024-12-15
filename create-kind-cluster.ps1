@@ -1,21 +1,21 @@
 param (
-    [switch]$EnableRegistry
+  [switch]$EnableRegistry
 )
 
 # Helper Function to Run Commands Silently
 function Run-Command {
-    param (
-        [Parameter(Mandatory)] [string]$Command
-    )
+  param (
+    [Parameter(Mandatory)] [string]$Command
+  )
 
-    # Split the command into executable and arguments
-    $cmdParts = $Command -split ' '
-    $executable = $cmdParts[0]
-    $arguments = $cmdParts[1..($cmdParts.Length - 1)]
+  # Split the command into executable and arguments
+  $cmdParts = $Command -split ' '
+  $executable = $cmdParts[0]
+  $arguments = $cmdParts[1..($cmdParts.Length - 1)]
 
-    # Execute the command, suppressing all output
-    Write-Host "Executing: $Command" -ForegroundColor DarkGray
-    & $executable @arguments *> $null 2>&1
+  # Execute the command, suppressing all output
+  Write-Host "Executing: $Command" -ForegroundColor DarkGray
+  & $executable @arguments *> $null 2>&1
 }
 
 # Delete the existing Kind cluster if it exists
@@ -45,8 +45,8 @@ nodes:
 
 # Add registry configuration to Kind if enabled
 if ($EnableRegistry) {
-    Write-Host "Enabling registry configuration in Kind config..." -ForegroundColor Cyan
-    $kindConfig += @"
+  Write-Host "Enabling registry configuration in Kind config..." -ForegroundColor Cyan
+  $kindConfig += @"
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry]
@@ -63,36 +63,37 @@ Run-Command "kind create cluster --config $kindConfigPath"
 
 # Registry setup: create and configure Docker registry if enabled
 if ($EnableRegistry) {
-    Write-Host "Checking for existing local Docker registry..." -ForegroundColor Cyan
-    if (-not (docker inspect -f '{{.State.Running}}' $regName 2>$null)) {
-        Write-Host "Creating local Docker registry..." -ForegroundColor Cyan
-        Run-Command "docker run -d --restart=always -p 127.0.0.1:${regPort}:5000 --network bridge --name $regName registry:2"
-    } else {
-        Write-Host "Local Docker registry already running." -ForegroundColor Green
-    }
+  Write-Host "Checking for existing local Docker registry..." -ForegroundColor Cyan
+  if (-not (docker inspect -f '{{.State.Running}}' $regName 2>$null)) {
+    Write-Host "Creating local Docker registry..." -ForegroundColor Cyan
+    Run-Command "docker run -d --restart=always -p 127.0.0.1:${regPort}:5000 --network bridge --name $regName registry:2"
+  }
+  else {
+    Write-Host "Local Docker registry already running." -ForegroundColor Green
+  }
 
-    # Connect the registry to the Kind network
-    Write-Host "Connecting local registry to Kind network..." -ForegroundColor Cyan
-    $networkCheck = docker inspect -f '{{json .NetworkSettings.Networks.kind}}' $regName *> $null
-    if ($networkCheck -eq "null") {
-        Run-Command "docker network connect kind $regName"
-    }
+  # Connect the registry to the Kind network
+  Write-Host "Connecting local registry to Kind network..." -ForegroundColor Cyan
+  $networkCheck = docker inspect -f '{{json .NetworkSettings.Networks.kind}}' $regName *> $null
+  if ($networkCheck -eq "null") {
+    Run-Command "docker network connect kind $regName"
+  }
 
-    # Add registry configuration to Kind nodes
-    Write-Host "Adding registry configuration to Kind nodes..." -ForegroundColor Cyan
-    $registryDir = "/etc/containerd/certs.d/localhost:${regPort}"
-    foreach ($node in (kind get nodes --name kind-cluster)) {
-        Write-Host "Configuring node: $node" -ForegroundColor Cyan
-        Run-Command "docker exec $node mkdir -p $registryDir"
-        $registryConfig = @"
+  # Add registry configuration to Kind nodes
+  Write-Host "Adding registry configuration to Kind nodes..." -ForegroundColor Cyan
+  $registryDir = "/etc/containerd/certs.d/localhost:${regPort}"
+  foreach ($node in (kind get nodes --name kind-cluster)) {
+    Write-Host "Configuring node: $node" -ForegroundColor Cyan
+    Run-Command "docker exec $node mkdir -p $registryDir"
+    $registryConfig = @"
 [host."http://kind-registry:5000"]
 "@
-        $registryConfig | docker exec -i $node sh -c "cat > ${registryDir}/hosts.toml"
-    }
+    $registryConfig | docker exec -i $node sh -c "cat > ${registryDir}/hosts.toml"
+  }
 
-    # Document the local registry in Kubernetes
-    Write-Host "Documenting the local registry in Kubernetes..." -ForegroundColor Cyan
-    $registryConfigMap = @"
+  # Document the local registry in Kubernetes
+  Write-Host "Documenting the local registry in Kubernetes..." -ForegroundColor Cyan
+  $registryConfigMap = @"
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -103,7 +104,7 @@ data:
     host: "localhost:${regPort}"
     help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 "@
-    $registryConfigMap | kubectl apply -f - *>$null
+  $registryConfigMap | kubectl apply -f - *>$null
 }
 
 # Helm Repository Setup
@@ -168,9 +169,16 @@ Write-Host "Generating wildcard TLS certificate..." -ForegroundColor Cyan
 if (Test-Path "_wildcard.localhost.pem") { Remove-Item -Force "_wildcard.localhost.pem" }
 if (Test-Path "_wildcard.localhost-key.pem") { Remove-Item -Force "_wildcard.localhost-key.pem" }
 
-Run-Command "mkcert '*.localhost'"
+# Directly run mkcert
+Write-Host "Running mkcert to generate certificate files..." -ForegroundColor Cyan
+mkcert *.localhost localhost
+
 Run-Command "kubectl create secret tls wildcard-localhost-tls -n istio-ingress --cert=_wildcard.localhost.pem --key=_wildcard.localhost-key.pem"
 
 Remove-Item -Force $kindConfigPath, $istioGatewayValuesPath
+
+if (Test-Path "_wildcard.localhost.pem") { Remove-Item -Force "_wildcard.localhost.pem" }
+if (Test-Path "_wildcard.localhost-key.pem") { Remove-Item -Force "_wildcard.localhost-key.pem" }
+
 
 Write-Host "Kind cluster setup with Istio and TLS is complete!" -ForegroundColor Green

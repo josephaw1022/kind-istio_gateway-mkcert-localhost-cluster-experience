@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}-selfsigned-cert
   namespace: istio-ingress
 spec:
-  secretName: {{ .Release.Name }}-tls
+  secretName: nginx-app-tls
   issuerRef:
     name: selfsigned-cluster-issuer
     kind: ClusterIssuer

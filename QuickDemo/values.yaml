@@ -9,4 +9,6 @@ gateway:
   name: "localhost-gateway"
   ns: "istio-ingress"
   host: "*.localhost"
-  tlsSecretName: "ngix-app-tls" # either nginx-app-tls or wildcard-localhost-tls
+
+  # either nginx-app-tls or wildcard-localhost-tls
+  tlsSecretName: "wildcard-localhost-tls"

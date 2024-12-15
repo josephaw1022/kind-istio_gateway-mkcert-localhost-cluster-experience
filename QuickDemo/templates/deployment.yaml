@@ -16,12 +16,24 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: "{{ .Values.nginx.image }}"
+          image: {{ .Values.nginx.image }}
           ports:
             - containerPort: 80
           volumeMounts:
             - name: html-volume
               mountPath: /usr/share/nginx/html
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
       volumes:
         - name: html-volume
           configMap:
