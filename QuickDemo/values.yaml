@@ -1,0 +1,12 @@
+replicaCount: 1
+
+nginx:
+  image: "nginx:latest"
+
+hostName: "nginx.localhost"
+
+gateway:
+  name: "localhost-gateway"
+  ns: "istio-ingress"
+  host: "*.localhost"
+  tlsSecretName: "ngix-app-tls" # either nginx-app-tls or wildcard-localhost-tls

@@ -1,14 +1,59 @@
+# NGINX + Istio Demo with Kind Cluster
 
-- install powershell (its cross-platform, so yes, you can run this if youre not on windows)
-- install mkcert 
-    - make sure you run `mkcert install` after install mkcert cli so that it can make the changes that it needs to, to your computers certificate settings
-- have podman or docker desktop running
+This project sets up a Kind Kubernetes cluster, installs Istio, and deploys a basic NGINX app using Helm.
 
+---
 
+## Prerequisites
 
-then run 
+Ensure the following tools are installed:
+- **PowerShell** (cross-platform)
+- **mkcert** (run `mkcert install` after installation)
+- **Podman** or **Docker Desktop** (running)
+- **Task CLI** ([Install Task](https://taskfile.dev/installation/))
 
+---
+
+## Tasks
+
+Run the following commands to automate setup and cleanup:
+
+- **Create the cluster**:
+   ```bash
+   task create-cluster
+   ```
+
+- **Deploy or upgrade the Helm chart**:
+   ```bash
+   task upgrade-chart
+   ```
+
+- **Delete the Helm chart**:
+   ```bash
+   task delete-chart
+   ```
+
+- **Delete the cluster**:
+   ```bash
+   task delete-cluster
+   ```
+
+---
+
+## Access the Demo
+
+After running `task upgrade-chart`, visit:
 
 ```
-pwsh .\create-kind-cluster.ps1
+https://nginx.localhost
+```
+
+---
+
+## Cleanup
+
+To remove everything:
+```bash
+task delete-chart
+task delete-cluster
 ```

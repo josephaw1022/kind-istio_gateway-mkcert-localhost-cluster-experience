@@ -25,7 +25,7 @@ Start-Sleep -Seconds 2
 Write-Host "Deleting existing Kind cluster (if any)..." -ForegroundColor Cyan
 Run-Command "kind delete cluster --name kind-cluster"
 
-# Step 1: Create the Local Docker Registry
+#  Create the Local Docker Registry
 $regName = "kind-registry"
 $regPort = 5001
 
@@ -37,7 +37,7 @@ if (-not (docker inspect -f '{{.State.Running}}' $regName 2>$null)) {
     Write-Host "Local Docker registry already running." -ForegroundColor Green
 }
 
-# Step 2: Define the Kind Cluster Configuration
+#  Define the Kind Cluster Configuration
 $kindConfig = @"
 kind: Cluster
 name: kind-cluster
@@ -65,14 +65,14 @@ Run-Command "kind create cluster --config $kindConfigPath"
 
 
 
-# Step 4: Connect the Registry to the Kind Network
+#  Connect the Registry to the Kind Network
 Write-Host "Connecting local registry to Kind network..." -ForegroundColor Cyan
 $networkCheck = docker inspect -f '{{json .NetworkSettings.Networks.kind}}' $regName *> $null
 if ($networkCheck -eq "null") {
     Run-Command "docker network connect kind $regName"
 }
 
-# Step 5: Document the Local Registry in Kubernetes
+#  Document the Local Registry in Kubernetes
 Write-Host "Documenting the local registry in Kubernetes..." -ForegroundColor Cyan
 $registryConfigMap = @"
 apiVersion: v1
@@ -87,19 +87,26 @@ data:
 "@
 $registryConfigMap | kubectl apply -f - *>$null
 
-# Step 6: Helm Repository Setup
+#  Helm Repository Setup
 Write-Host "Adding Helm repositories..." -ForegroundColor Cyan
 Run-Command "helm repo add jetstack https://charts.jetstack.io"
 Run-Command "helm repo add istio https://istio-release.storage.googleapis.com/charts"
+Run-Command "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
 Run-Command "helm repo update"
 
-# Step 7: Install Cert-Manager
+#  Install Cert-Manager
 Write-Host "Installing Cert-Manager..." -ForegroundColor Cyan
 Run-Command "helm upgrade --install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.16.2 --set crds.enabled=true"
 
 Start-Sleep -Seconds 2
 
-# Step 8: Install Istio
+# Install kube-prometheus-stack
+Write-Host "Installing kube-prometheus-stack for monitoring..." -ForegroundColor Cyan
+Run-Command "helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace --wait"
+
+Start-Sleep -Seconds 2
+
+#  Install Istio
 Write-Host "Installing Istio components..." -ForegroundColor Cyan
 Run-Command "helm upgrade --install istio-base istio/base -n istio-system --set defaultRevision=default --create-namespace"
 Start-Sleep -Seconds 2
@@ -108,7 +115,7 @@ Start-Sleep -Seconds 2
 Run-Command "helm upgrade --install istiod istio/istiod -n istio-system --wait"
 Start-Sleep -Seconds 5
 
-# Step 9: Install Istio Gateway
+#  Install Istio Gateway
 $istioGatewayValues = @"
 service:
   type: NodePort
@@ -133,7 +140,7 @@ $istioGatewayValues | Out-File -FilePath $istioGatewayValuesPath -Encoding UTF8
 Write-Host "Installing Istio Gateway..." -ForegroundColor Cyan
 Run-Command "helm upgrade --install istio-ingress istio/gateway -n istio-ingress --create-namespace -f $istioGatewayValuesPath --wait"
 
-# Step 10: Generate and Install Wildcard TLS Certificate
+#  Generate and Install Wildcard TLS Certificate
 Write-Host "Generating wildcard TLS certificate..." -ForegroundColor Cyan
 
 if (Test-Path "_wildcard.localhost.pem") {
@@ -149,5 +156,3 @@ Run-Command "kubectl create secret tls wildcard-localhost-tls -n istio-ingress -
 
 # Cleanup temporary files
 Remove-Item -Force $kindConfigPath, $istioGatewayValuesPath
-
-Write-Host "Kind cluster with local registry, Istio Gateway, and wildcard TLS setup completed!" -ForegroundColor Green

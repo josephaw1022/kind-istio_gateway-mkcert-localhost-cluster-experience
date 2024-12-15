@@ -1,0 +1,30 @@
+version: '3'
+
+tasks:
+  create-cluster:
+    desc: "Create the Kind cluster using the PowerShell script"
+    cmds:
+    - powershell -ExecutionPolicy Bypass -File create-kind-cluster.ps1
+    silent: false
+    aliases: [ "c" ]
+
+  delete-cluster:
+    desc: "Delete the Kind cluster"
+    cmds:
+    - kind delete cluster --name kind-cluster
+    silent: false
+    aliases: [ "d" ]
+
+  upgrade-chart:
+    desc: "Deploy or upgrade the Helm chart"
+    cmds:
+    - helm upgrade --install nginx-app ./QuickDemo  --namespace nginx-app  --create-namespace
+    silent: false
+    aliases: [ "u" ]
+
+  delete-chart:
+    desc: "Delete the namespace where the Helm chart is deployed"
+    cmds:
+    - kubectl delete namespace nginx-app --ignore-not-found
+    silent: false
+    aliases: [ "dc" ]
