@@ -9,6 +9,16 @@ gateway:
   name: "localhost-gateway"
   ns: "istio-ingress"
   host: "*.localhost"
-
   # either nginx-app-tls or mkcert-tls
-  tlsSecretName: "nginx-app-tls"
+  tlsSecretName: "mkcert-tls"
+
+  forceHttpToHttps: true
+
+htmlIndex:
+  title: "Welcome to the Local Kind Istio Demo!"
+  description: "This demo showcases traffic routed through the Istio Gateway to an NGINX pod."
+  host: "*.localhost"
+  tlsSecret: "nginx-app-tls"
+  footer: "Powered by Istio and NGINX"
+  footerLinkText: "Learn More"
+  footerLink: "https://istio.io"

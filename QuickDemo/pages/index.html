@@ -1,0 +1,89 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Values.htmlIndex.title }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background: #1f7bc1; /* Darker Blue */
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            letter-spacing: 1px;
+        }
+        main {
+            flex: 1;
+            padding: 30px;
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #d6eaff; /* Light blue with darker contrast */
+            border-left: 5px solid #1f7bc1;
+            font-size: 1.1em;
+        }
+        .info strong {
+            color: #1f7bc1;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background: #1f7bc1;
+            color: #fff;
+            font-size: 0.9em;
+        }
+        footer a {
+            color: #fff;
+            text-decoration: underline;
+        }
+        footer a:hover {
+            color: #d6eaff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{{ .Values.htmlIndex.title }}</h1>
+    </header>
+    <main>
+        <p>{{ .Values.htmlIndex.description }}</p>
+        <div class="info">
+            <p><strong>Host:</strong> {{ .Values.htmlIndex.host }}</p>
+            <p><strong>TLS Secret:</strong> {{ .Values.htmlIndex.tlsSecret }}</p>
+        </div>
+        <p>This demo page showcases the power of Istio's traffic management, including routing, security, and observability.</p>
+        <p>With Istio, your applications can seamlessly integrate advanced networking capabilities without modifying the code.</p>
+        <p>NGINX serves as an example workload, but Istio works with any modern application. Your application doesn't need to be a suite of complicated microservices or some super scalable system for this to work for you!</p>
+        <p>Use this demo to explore features like ingress gateways, mutual TLS, circuit breakers, and request tracing.</p>
+    </main>
+    <footer>
+        <p>{{ .Values.htmlIndex.footer }} |
+           <a href="{{ .Values.htmlIndex.footerLink }}" target="_blank">{{ .Values.htmlIndex.footerLinkText }}</a>
+        </p>
+    </footer>
+</body>
+</html>
