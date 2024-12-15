@@ -164,21 +164,34 @@ $istioGatewayValues | Out-File -FilePath $istioGatewayValuesPath -Encoding UTF8
 
 Run-Command "helm upgrade --install istio-ingress istio/gateway -n istio-ingress --create-namespace -f $istioGatewayValuesPath --wait"
 
-# Generate and Install Wildcard TLS Certificate
-Write-Host "Generating wildcard TLS certificate..." -ForegroundColor Cyan
-if (Test-Path "_wildcard.localhost.pem") { Remove-Item -Force "_wildcard.localhost.pem" }
-if (Test-Path "_wildcard.localhost-key.pem") { Remove-Item -Force "_wildcard.localhost-key.pem" }
 
-# Directly run mkcert
-Write-Host "Running mkcert to generate certificate files..." -ForegroundColor Cyan
-mkcert *.localhost localhost
+# Generate Wildcard TLS Certificate
+Write-Host "Generating wildcard TLS certificate for multiple domains..." -ForegroundColor Cyan
 
-Run-Command "kubectl create secret tls wildcard-localhost-tls -n istio-ingress --cert=_wildcard.localhost.pem --key=_wildcard.localhost-key.pem"
+# Remove existing files if they exist
+if (Test-Path "cert.pem") { Remove-Item -Force "cert.pem" }
+if (Test-Path "key.pem") { Remove-Item -Force "key.pem" }
 
-Remove-Item -Force $kindConfigPath, $istioGatewayValuesPath
+# Generate certificates for multiple domains
+$domains = "*.local-cluster.com local-cluster.com"
+Write-Host "Generating certificates for domains: $domains" -ForegroundColor Cyan
+mkcert -key-file key.pem -cert-file cert.pem *.local-cluster.com local-cluster.com
 
-if (Test-Path "_wildcard.localhost.pem") { Remove-Item -Force "_wildcard.localhost.pem" }
-if (Test-Path "_wildcard.localhost-key.pem") { Remove-Item -Force "_wildcard.localhost-key.pem" }
+# Verify certificate files exist
+if (-Not (Test-Path "cert.pem") -or -Not (Test-Path "key.pem")) {
+    Write-Host "Error: Certificate files not generated. Check mkcert installation and configuration." -ForegroundColor Red
+    Exit 1
+}
 
+# Create Kubernetes TLS secret
+Write-Host "Creating Kubernetes TLS secret..." -ForegroundColor Cyan
+kubectl create secret tls mkcert-tls `
+    --cert=cert.pem `
+    --key=key.pem `
+    -n istio-ingress
 
-Write-Host "Kind cluster setup with Istio and TLS is complete!" -ForegroundColor Green
+# Clean up certificate files
+if(Test-Path "cert.pem") { Remove-Item -Force "cert.pem" }
+if(Test-Path "key.pem") { Remove-Item -Force "key.pem" }
+
+Write-Host "TLS secret created successfully for *.local-cluster and local-cluster!" -ForegroundColor Green

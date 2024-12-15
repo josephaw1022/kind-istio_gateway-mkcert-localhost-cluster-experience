@@ -3,12 +3,12 @@ replicaCount: 1
 nginx:
   image: "nginx:latest"
 
-hostName: "nginx.localhost"
+hostName: "local-cluster.com"
 
 gateway:
   name: "localhost-gateway"
   ns: "istio-ingress"
-  host: "*.localhost"
+  host: "local-cluster.com"
 
-  # either nginx-app-tls or wildcard-localhost-tls
-  tlsSecretName: "wildcard-localhost-tls"
+  # either nginx-app-tls or mkcert-tls
+  tlsSecretName: "mkcert-tls"
