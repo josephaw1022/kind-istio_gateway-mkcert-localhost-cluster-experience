@@ -1,16 +1,16 @@
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: {{ .Release.Name }}-nginx-vs
 spec:
   hosts:
-    - "{{ .Values.hostName }}"
+    - {{ .Values.hostName }}
   gateways:
-    - "{{ .Values.gateway.ns }}/{{ .Values.gateway.name }}"
+    - {{ .Values.gateway.ns }}/{{ .Values.gateway.name }}
   http:
     - route:
         - destination:
-            host: nginx-app
+            host: nginx-app.nginx-app.svc.cluster.local
             port:
               number: 80
