@@ -2,6 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ .Release.Name }}-selfsigned-cert
+  namespace: istio-ingress
 spec:
   secretName: {{ .Release.Name }}-tls
   issuerRef:
