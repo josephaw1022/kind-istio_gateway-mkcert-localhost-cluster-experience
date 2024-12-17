@@ -1,0 +1,12 @@
+deployment:
+  replicaCount: 1
+  image: "mcr.microsoft.com/dotnet/samples:aspnetapp"
+
+service:
+  name: aspnetcore-sample
+  port: 80
+  targetPort: 8080
+
+virtualService:
+  hostName: "client-b.localhost"
+  gateway: "istio-ingress/localhost-gateway"

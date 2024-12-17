@@ -1,0 +1,16 @@
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-aspnetcore-vs
+spec:
+  hosts:
+    - {{ .Values.virtualService.hostName }}
+  gateways:
+    - {{ .Values.virtualService.gateway }}
+  http:
+    - route:
+        - destination:
+            host: {{ .Values.service.name }}
+            port:
+              number: {{ .Values.service.port }}

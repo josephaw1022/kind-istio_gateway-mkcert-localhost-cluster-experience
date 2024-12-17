@@ -1,0 +1,16 @@
+deployment:
+  replicaCount: 1
+  image: "nginx:latest"
+
+virtualService:
+  hostName: "client-a.localhost"
+  gateway: "istio-ingress/localhost-gateway"
+
+htmlIndex:
+  title: "Welcome to the Local Kind Istio Demo!"
+  description: "This demo showcases traffic routed through the Istio Gateway to an NGINX pod."
+  host: "*.localhost"
+  tlsSecret: "nginx-app-tls"
+  footer: "Powered by Istio and NGINX"
+  footerLinkText: "Learn More"
+  footerLink: "https://istio.io"

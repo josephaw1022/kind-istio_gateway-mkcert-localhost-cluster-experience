@@ -1,0 +1,45 @@
+version: '3'
+
+tasks:
+  upgrade-chart:
+    desc: "Deploy or upgrade the ProjectForClientBProject Helm chart"
+    cmds:
+    - helm upgrade --install projectforclientb . --namespace projectforclientb --create-namespace
+    silent: false
+    aliases: [ "u" ]
+
+  delete-chart:
+    desc: "Delete the namespace where the ProjectForClientBProject Helm chart is deployed"
+    cmds:
+    - helm uninstall projectforclientb --namespace projectforclientb
+    - kubectl delete namespace projectforclientb --ignore-not-found
+    silent: false
+    aliases: [ "dc" ]
+
+  lint-chart:
+    desc: "Lint the Helm chart for syntax and structure errors"
+    cmds:
+    - helm lint .
+    silent: false
+    aliases: [ "l" ]
+
+  template-chart:
+    desc: "Render the Helm chart templates locally to validate YAML output"
+    cmds:
+    - helm template projectforclientb . --namespace projectforclientb
+    silent: false
+    aliases: [ "t" ]
+
+  test-chart:
+    desc: "Run Helm chart tests (if any are defined)"
+    cmds:
+    - helm test projectforclientb --namespace projectforclientb || echo 'No tests defined'
+    silent: false
+    aliases: [ "tc" ]
+
+  list-releases:
+    desc: "List Helm releases in the target namespace"
+    cmds:
+    - helm list --namespace projectforclientb
+    silent: false
+    aliases: [ "lr" ]

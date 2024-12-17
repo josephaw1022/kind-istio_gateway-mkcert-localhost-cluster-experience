@@ -1,0 +1,45 @@
+version: '3'
+
+tasks:
+  upgrade-chart:
+    desc: "Deploy or upgrade the ProjectForClientAProject Helm chart"
+    cmds:
+    - helm upgrade --install projectforclienta . --namespace projectforclienta --create-namespace
+    silent: false
+    aliases: [ "u" ]
+
+  delete-chart:
+    desc: "Delete the namespace where the ProjectForClientAProject Helm chart is deployed"
+    cmds:
+    - helm uninstall projectforclienta --namespace projectforclienta
+    - kubectl delete namespace projectforclienta --ignore-not-found
+    silent: false
+    aliases: [ "dc" ]
+
+  lint-chart:
+    desc: "Lint the Helm chart for syntax and structure errors"
+    cmds:
+    - helm lint .
+    silent: false
+    aliases: [ "l" ]
+
+  template-chart:
+    desc: "Render the Helm chart templates locally to validate YAML output"
+    cmds:
+    - helm template projectforclienta . --namespace projectforclienta
+    silent: false
+    aliases: [ "t" ]
+
+  test-chart:
+    desc: "Run Helm chart tests (if any are defined)"
+    cmds:
+    - helm test projectforclienta --namespace projectforclienta || echo 'No tests defined'
+    silent: false
+    aliases: [ "tc" ]
+
+  list-releases:
+    desc: "List Helm releases in the target namespace"
+    cmds:
+    - helm list --namespace projectforclienta
+    silent: false
+    aliases: [ "lr" ]

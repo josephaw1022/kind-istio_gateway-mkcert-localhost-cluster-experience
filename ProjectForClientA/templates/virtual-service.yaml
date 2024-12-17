@@ -5,9 +5,9 @@ metadata:
   name: {{ .Release.Name }}-nginx-vs
 spec:
   hosts:
-    - {{ .Values.hostName }}
+    - {{ .Values.virtualService.hostName }}
   gateways:
-    - {{ .Values.gateway.ns }}/{{ .Values.gateway.name }}
+    - {{ .Values.virtualService.gateway }}
   http:
     - route:
         - destination:
