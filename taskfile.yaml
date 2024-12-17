@@ -1,5 +1,16 @@
 version: '3'
 
+includes:
+  clienta:
+    taskfile: ./ProjectForClientA/Taskfile.yaml
+    dir: ./ProjectForClientA
+    aliases: [ "a" ]
+
+  clientb:
+    taskfile: ./ProjectForClientB/Taskfile.yaml
+    dir: ./ProjectForClientB
+    aliases: [ "b" ]
+
 tasks:
 
   full-start:
@@ -35,14 +46,14 @@ tasks:
   upgrade-chart:
     desc: "Deploy or upgrade the Helm chart"
     cmds:
-    - helm upgrade --install nginx-app ./QuickDemo  --namespace nginx-app  --create-namespace
+    - helm upgrade --install clustergateway ./ClusterGateway  --namespace clustergateway  --create-namespace
     silent: false
     aliases: [ "u" ]
 
   delete-chart:
     desc: "Delete the namespace where the Helm chart is deployed"
     cmds:
-    - helm uninstall nginx-app --namespace nginx-app
-    - kubectl delete namespace nginx-app --ignore-not-found
+    - helm uninstall clustergateway --namespace clustergateway
+    - kubectl delete namespace clustergateway --ignore-not-found
     silent: false
     aliases: [ "dc" ]
